@@ -22,3 +22,7 @@ Route.get('/', () => {
 
 Route.post('register', 'Usercontroller.register')
 Route.post('login', 'Usercontroller.login')
+Route.get('users', 'Usercontroller.allUser')
+Route.get('users/:id', 'Usercontroller.showUser')
+
+
