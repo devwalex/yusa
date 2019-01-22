@@ -6,11 +6,15 @@ class UserController {
     async register({ response, request }){
         try {
             // Getting the user input
-            const { username, email, password } = request.post()
+           
+            const {  first_name, last_name, username, email, phone_no, password } = request.post()
             // Creating a new user object
             const user = new User()
+            user.first_name = first_name,
+            user.last_name = last_name,
             user.username = username,
             user.email = email,
+            user.phone_no = phone_no,
             user.password = password
             
             await user.save()
