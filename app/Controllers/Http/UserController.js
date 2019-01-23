@@ -1,6 +1,8 @@
 "use strict";
 
 const User = use("App/Models/User");
+const Mail = use("Mail");
+var randomString = require("random-string");
 
 class UserController {
   async register({ response, request }) {
@@ -23,8 +25,19 @@ class UserController {
       user.email = email;
       user.phone_no = phone_no;
       user.password = password;
+      user.verification_token = randomString({ length: 20 });
 
       await user.save();
+
+      await Mail.raw(
+        `<h1> Verify Your Account </h1><a href=localhost:3335/account/verify/${
+          user.verification_token
+        }>Verify</a>`,
+        message => {
+          message.from(user.email);
+          message.to("api@yusa.com");
+        }
+      );
 
       response.status(200).json({
         message: "Registered a new user successfully",
@@ -156,6 +169,30 @@ class UserController {
       response.status(401).json({
         message: "Unauthorized",
         error
+      });
+    }
+  }
+
+  async VerifyAccount({
+    response,
+    request,
+    auth,
+    params: { verification_token }
+  }) {
+    const user = await User.query()
+      .where("verification_token", verification_token)
+      .first();
+    if (user.verification_token == verification_token) {
+      user.is_verify = 1;
+      user.verification_token = null;
+      await user.save();
+      response.status(200).json({
+        message: "Your account have been verified",
+        data: user
+      });
+    } else {
+      response.status(404).json({
+        message: "Token not found"
       });
     }
   }
