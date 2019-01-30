@@ -30,7 +30,11 @@ class UserController {
       await user.save();
 
       await Mail.raw(
-        `<h1> Verify Your Account </h1><a href=localhost:3335/account/verify/${
+        `<h1><center> Verify Your Account</center></h1><p>Dear ${
+          user.first_name
+        }</p><br>
+        <p>You have successfully register your acount with us at yusaapi.org. Click on the link below to verify your account.</p>
+        <a href=localhost:3335/account/verify/${
           user.verification_token
         }>Verify</a>`,
         message => {
@@ -179,9 +183,19 @@ class UserController {
     auth,
     params: { verification_token }
   }) {
-    const user = await User.query()
-      .where("verification_token", verification_token)
-      .first();
+    const user = await User.findByOrFail(
+      "verification_token",
+      verification_token
+    );
+    // .query()
+    //   .where("verification_token", verification_token)
+    //   .first();
+    console.log("vrfyx", user.verification_token);
+    // if (user.is_verify == 1) {
+    //   response.status(400).json({
+    //     message: "Your account has already been verified."
+    //   });
+    // }
     if (user.verification_token == verification_token) {
       user.is_verify = 1;
       user.verification_token = null;
