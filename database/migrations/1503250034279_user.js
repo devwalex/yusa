@@ -21,8 +21,9 @@ class UserSchema extends Schema {
       table.string("gender");
       table.string("address");
       table.string("password", 60).notNullable();
-      table.boolean("is_verify");
+      table.boolean("is_verify").defaultTo(0);
       table.string("verification_token");
+      table.boolean("is_login").defaultTo(0);
       table.timestamps();
     });
   }

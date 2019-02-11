@@ -3,6 +3,7 @@
 const User = use("App/Models/User");
 const Mail = use("Mail");
 var randomString = require("random-string");
+const Encryption = use("Encryption");
 
 class UserController {
   async register({ response, request }) {
@@ -64,7 +65,9 @@ class UserController {
       // fetching the user details
       const user = await User.query()
         .where("email", email)
-        .fetch();
+        .first();
+      user.is_login = 1;
+      await user.save();
 
       response.status(200).json({
         message: "User logged in",
@@ -201,6 +204,29 @@ class UserController {
         error
       });
     }
+  }
+
+  async logOut({ response, request, auth }) {
+    const user = await auth.current.user;
+
+    // get the current user's token
+    const token = auth.getAuthHeader();
+
+    // revoke the token
+    await user
+      .tokens()
+      .where("type", "api_token")
+      .where("is_revoked", false)
+      .where("token", Encryption.decrypt(token))
+      .update({ is_revoked: true });
+
+    user.is_login = false;
+    await user.save();
+
+    return response.send({
+      message: "Successfully logged out",
+      data: user
+    });
   }
 }
 

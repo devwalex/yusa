@@ -17,16 +17,14 @@
 const Route = use("Route");
 
 Route.get("/", () => {
-  return { greeting: "Hello world in JSON" };
+  return { docs: "Yusa Api Documentation" };
 });
 
 Route.post("register", "UserController.register").validator("Register");
 Route.post("login", "UserController.login");
+Route.post("logout", "UserController.logOut").middleware(["auth"]);
 Route.get("users", "UserController.allUser");
-Route.get(
-  "account/verify/:verification_token",
-  "UserController.VerifyAccount"
-);
+Route.get("account/verify/:verification_token", "UserController.VerifyAccount");
 Route.get("users/:id", "UserController.showUser");
 Route.group(() => {
   Route.get("profile", "UserController.profile");
