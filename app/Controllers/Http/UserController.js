@@ -183,20 +183,11 @@ class UserController {
     auth,
     params: { verification_token }
   }) {
-    const user = await User.findByOrFail(
-      "verification_token",
-      verification_token
-    );
-    // .query()
-    //   .where("verification_token", verification_token)
-    //   .first();
-    console.log("vrfyx", user.verification_token);
-    // if (user.is_verify == 1) {
-    //   response.status(400).json({
-    //     message: "Your account has already been verified."
-    //   });
-    // }
-    if (user.verification_token == verification_token) {
+    try {
+      const user = await User.findByOrFail(
+        "verification_token",
+        verification_token
+      );
       user.is_verify = 1;
       user.verification_token = null;
       await user.save();
@@ -204,9 +195,10 @@ class UserController {
         message: "Your account have been verified",
         data: user
       });
-    } else {
+    } catch (error) {
       response.status(404).json({
-        message: "Token not found"
+        message: "Your account has been verified already.",
+        error
       });
     }
   }
