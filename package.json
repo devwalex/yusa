@@ -27,6 +27,7 @@
     "@adonisjs/mail": "^3.0.9",
     "@adonisjs/validator": "^5.0.6",
     "mysql": "^2.16.0",
+    "nexmo": "^2.4.1",
     "random-string": "^0.2.0"
   },
   "devDependencies": {},

@@ -4,6 +4,7 @@ const User = use("App/Models/User");
 const Mail = use("Mail");
 var randomString = require("random-string");
 const Encryption = use("Encryption");
+const Nexmo = require("nexmo");
 
 class UserController {
   async register({ response, request }) {
@@ -29,7 +30,27 @@ class UserController {
       user.verification_token = randomString({ length: 20 });
 
       await user.save();
+      const nexmo = new Nexmo({
+        apiKey: "9e499a12",
+        apiSecret: "8cFTmb0sbsDbYZH0"
+      });
 
+      const from = "Yusa";
+      const to = user.phone_no;
+      const text =
+        "Thanks for registering with us at yusa. Check your email to verify account.";
+
+      nexmo.message.sendSms(from, to, text);
+      nexmo.message.sendSms(
+        from, to, text,
+          (err, responseData) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.dir(responseData);
+            }
+          }
+       );
       await Mail.raw(
         `<h1><center> Verify Your Account</center></h1><p>Dear ${
           user.first_name
@@ -194,6 +215,7 @@ class UserController {
       user.is_verify = 1;
       user.verification_token = null;
       await user.save();
+
       response.status(200).json({
         message: "Your account have been verified",
         data: user
