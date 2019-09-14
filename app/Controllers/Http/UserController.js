@@ -2,7 +2,7 @@
 
 const User = use("App/Models/User");
 const Mail = use("Mail");
-var randomString = require("random-string");
+let randomString = require("random-string");
 const Encryption = use("Encryption");
 const Nexmo = require("nexmo");
 
@@ -10,14 +10,7 @@ class UserController {
   async register({ response, request }) {
     try {
       // Getting the user input
-      const {
-        first_name,
-        last_name,
-        username,
-        email,
-        phone_no,
-        password
-      } = request.post();
+      const { first_name, last_name, username, email, phone_no, password } = request.post();
 
       // Creating a new user object
       const user = new User();
@@ -37,33 +30,23 @@ class UserController {
 
       const from = "Yusa";
       const to = user.phone_no;
-      const text =
-        "Thanks for registering with us at yusa. Check your email to verify account.";
-
+      const text = "Thanks for registering with us at yusa. Check your email to verify account.";
       nexmo.message.sendSms(from, to, text);
-      nexmo.message.sendSms(
-        from, to, text,
-          (err, responseData) => {
-            if (err) {
-              console.log(err);
-            } else {
-              console.dir(responseData);
-            }
-          }
-       );
-      await Mail.raw(
-        `<h1><center> Verify Your Account</center></h1><p>Dear ${
-          user.first_name
-        }</p><br>
+      nexmo.message.sendSms(from, to, text, (err, responseData) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.dir(responseData);
+        }
+      });
+
+      await Mail.raw(`<h1><center> Verify Your Account</center></h1><p>Dear ${user.first_name}</p><br>
         <p>You have successfully register your acount with us at yusaapi.org. Click on the link below to verify your account.</p>
-        <a href=localhost:3335/account/verify/${
-          user.verification_token
-        }>Verify</a>`,
+        <a href=localhost:3335/account/verify/${user.verification_token}>Verify</a>`,
         message => {
           message.from(user.email);
           message.to("api@yusa.com");
-        }
-      );
+        });
 
       response.status(200).json({
         message: "Registered a new user successfully",
@@ -81,8 +64,10 @@ class UserController {
     try {
       // Getting the email and password from input field
       const { email, password } = request.all();
+
       // create a token and logging the user in.
       const token = await auth.attempt(email, password);
+
       // fetching the user details
       const user = await User.query()
         .where("email", email)
@@ -172,13 +157,7 @@ class UserController {
 
   async editProfile({ response, request, auth }) {
     try {
-      const {
-        first_name,
-        last_name,
-        username,
-        gender,
-        address
-      } = request.post();
+      const { first_name, last_name, username, gender, address } = request.post();
 
       const user = await auth.current.user;
 
@@ -201,12 +180,7 @@ class UserController {
     }
   }
 
-  async VerifyAccount({
-    response,
-    request,
-    auth,
-    params: { verification_token }
-  }) {
+  async VerifyAccount({ response, params: { verification_token } }) {
     try {
       const user = await User.findByOrFail(
         "verification_token",
@@ -228,7 +202,7 @@ class UserController {
     }
   }
 
-  async logOut({ response, request, auth }) {
+  async logOut({ response, auth }) {
     const user = await auth.current.user;
 
     // get the current user's token
@@ -240,7 +214,9 @@ class UserController {
       .where("type", "api_token")
       .where("is_revoked", false)
       .where("token", Encryption.decrypt(token))
-      .update({ is_revoked: true });
+      .update({
+        is_revoked: true
+      });
 
     user.is_login = false;
     await user.save();

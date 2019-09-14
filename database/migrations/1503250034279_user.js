@@ -9,14 +9,8 @@ class UserSchema extends Schema {
       table.increments();
       table.string("first_name");
       table.string("last_name");
-      table
-        .string("username", 80)
-        .notNullable()
-        .unique();
-      table
-        .string("email", 254)
-        .notNullable()
-        .unique();
+      table.string("username", 80).notNullable().unique();
+      table.string("email", 254).notNullable().unique();
       table.string("phone_no");
       table.string("gender");
       table.string("address");

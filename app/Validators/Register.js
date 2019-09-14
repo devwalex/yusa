@@ -6,7 +6,7 @@ class Register {
     return true
   }
 
-  get rules () {
+  get rules() {
     return {
       // validation rules
       first_name: 'required|string',
