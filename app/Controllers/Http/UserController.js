@@ -2,15 +2,24 @@
 
 const User = use("App/Models/User");
 const Mail = use("Mail");
-let randomString = require("random-string");
 const Encryption = use("Encryption");
-const Nexmo = require("nexmo");
+const randomString = require("random-string");
+const Database = use("Database");
+const sendSms = use("App/HelperFunctions/SendSms");
 
 class UserController {
   async register({ response, request }) {
+    const trx = await Database.beginTransaction();
     try {
       // Getting the user input
-      const { first_name, last_name, username, email, phone_no, password } = request.post();
+      const {
+        first_name,
+        last_name,
+        username,
+        email,
+        phone_no,
+        password
+      } = request.post();
 
       // Creating a new user object
       const user = new User();
@@ -22,38 +31,41 @@ class UserController {
       user.password = password;
       user.verification_token = randomString({ length: 20 });
 
-      await user.save();
-      const nexmo = new Nexmo({
-        apiKey: "9e499a12",
-        apiSecret: "8cFTmb0sbsDbYZH0"
-      });
+      await user.save(trx);
 
-      const from = "Yusa";
-      const to = user.phone_no;
-      const text = "Thanks for registering with us at yusa. Check your email to verify account.";
-      nexmo.message.sendSms(from, to, text);
-      nexmo.message.sendSms(from, to, text, (err, responseData) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.dir(responseData);
-        }
-      });
+      // Send Mail
+      await Mail.raw(
+        `<h1>
+          <center> Verify Your Account</center>
+        </h1>
 
-      await Mail.raw(`<h1><center> Verify Your Account</center></h1><p>Dear ${user.first_name}</p><br>
+        <p>Dear ${user.first_name}</p><br>
         <p>You have successfully register your acount with us at yusaapi.org. Click on the link below to verify your account.</p>
         <a href=localhost:3335/account/verify/${user.verification_token}>Verify</a>`,
         message => {
-          message.from(user.email);
-          message.to("api@yusa.com");
-        });
+          message.from("api@yusa.com");
+          message.to(user.email);
+          message.subject("Account Verification Link - Yusa");
+        }
+      );
 
-      response.status(200).json({
-        message: "Registered a new user successfully",
-        data: user
+      // Send SMS
+      sendSms(
+        "Yusa",
+        user.phone_no,
+        "Thanks for registering with us at yusa. Check your email to verify account."
+      );
+
+      trx.commit();
+      response.status(201).json({
+        success: true,
+        message: "Registered a new user successfully"
       });
     } catch (error) {
-      response.status(401).json({
+      console.log("User Registration Error >>>>", error);
+      await trx.rollback();
+      response.status(500).json({
+        success: false,
         message: "Unable to register user try again....",
         error
       });
@@ -157,7 +169,13 @@ class UserController {
 
   async editProfile({ response, request, auth }) {
     try {
-      const { first_name, last_name, username, gender, address } = request.post();
+      const {
+        first_name,
+        last_name,
+        username,
+        gender,
+        address
+      } = request.post();
 
       const user = await auth.current.user;
 
