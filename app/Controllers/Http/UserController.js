@@ -88,13 +88,21 @@ class UserController {
       await user.save();
 
       response.status(200).json({
-        message: "User logged in",
-        data: user,
-        result: token
+        success: true,
+        message: "User Logged In Successfully",
+        token
       });
     } catch (error) {
-      response.status(401).json({
-        message: "Unable to login user",
+      console.log("User Login Error >>>>", error);
+      if (error.authScheme === "jwt") {
+        return response.status(400).json({
+          success: false,
+          message: "Incorrect Email Or password"
+        });
+      }
+      response.status(500).json({
+        success: false,
+        message: "Internal Server Error",
         error
       });
     }
