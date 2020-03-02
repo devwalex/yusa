@@ -17,15 +17,15 @@
 const Route = use("Route");
 
 Route.get("/", () => {
-  return { docs: "Yusa Api Documentation" };
+  return { docs: "Yusa API Documentation" };
 });
 
 Route.post("register", "UserController.register").validator("Register");
 Route.post("login", "UserController.login");
 Route.post("logout", "UserController.logOut").middleware(["auth"]);
-Route.get("users", "UserController.allUser");
+Route.get("users", "UserController.viewAllUser");
 Route.get("account/verify/:verification_token", "UserController.VerifyAccount");
-Route.get("users/:id", "UserController.showUser");
+Route.get("users/:id", "UserController.viewSingleUser");
 Route.group(() => {
   Route.get("profile", "UserController.profile");
   Route.put("edit-profile", "UserController.editProfile");

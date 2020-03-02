@@ -108,23 +108,26 @@ class UserController {
     }
   }
 
-  async allUser({ response }) {
+  async viewAllUser({ response }) {
     try {
       // fetching all the registered user
       const users = await User.all();
       response.status(200).json({
+        success: true,
         message: "All registered users",
         data: users
       });
     } catch (error) {
-      response.status(401).json({
-        message: "Users not found",
+      console.log("All Users Error >>>", error);
+      response.status(500).json({
+        success: false,
+        message: "Internal Server Error",
         error
       });
     }
   }
 
-  async showUser({ response, params: { id } }) {
+  async viewSingleUser({ response, params: { id } }) {
     try {
       // fetching user where id is equal to user id
       const user = await User.query()
@@ -133,18 +136,19 @@ class UserController {
 
       // check if user is found
       if (!user) {
-        response.status(404).json({
-          message: "User not found",
-          error
-        });
-      } else {
-        response.status(201).json({
-          data: user
+        return response.status(404).json({
+          success: false,
+          message: "User Not Found"
         });
       }
+
+      response.status(200).json({
+        data: user
+      });
     } catch (error) {
-      response.status(404).json({
-        message: "User not found",
+      response.status(500).json({
+        success: false,
+        message: "Internal Server Error",
         error
       });
     }
