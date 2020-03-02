@@ -27,7 +27,7 @@ Route.get("users", "UserController.viewAllUser");
 Route.get("account/verify/:verification_token", "UserController.VerifyAccount");
 Route.get("users/:id", "UserController.viewSingleUser");
 Route.group(() => {
-  Route.get("profile", "UserController.profile");
+  Route.get("profile", "UserController.viewProfile");
   Route.put("edit-profile", "UserController.editProfile");
 })
   .prefix("account")

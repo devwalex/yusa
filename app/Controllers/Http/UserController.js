@@ -143,6 +143,7 @@ class UserController {
       }
 
       response.status(200).json({
+        success: true,
         data: user
       });
     } catch (error) {
@@ -154,26 +155,28 @@ class UserController {
     }
   }
 
-  async profile({ response, auth }) {
+  async viewProfile({ response, auth }) {
     try {
-      const currentUser = await auth.current.user;
+      const authenticatedUser = await auth.current.user;
       const user = await User.query()
-        .where("id", currentUser.id)
+        .where("id", authenticatedUser.id)
         .first();
 
-      if (user) {
-        response.status(201).json({
-          message: `Welcome ${user.first_name}`,
-          data: user
-        });
-      } else {
-        response.status(400).json({
+      if (!user) {
+        return response.status(400).json({
+          success: false,
           message: "You must be logged In to view your profile"
         });
       }
+      response.status(200).json({
+        success: true,
+        message: `Welcome ${user.first_name}`,
+        data: user
+      });
     } catch (error) {
-      response.status(401).json({
-        message: "Unauthorized Request",
+      response.status(500).json({
+        success: false,
+        message: "Internal Server Error",
         error
       });
     }
