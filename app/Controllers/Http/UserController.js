@@ -147,6 +147,7 @@ class UserController {
         data: user
       });
     } catch (error) {
+      console.log("View Single User Error >>>", error);
       response.status(500).json({
         success: false,
         message: "Internal Server Error",
@@ -174,6 +175,7 @@ class UserController {
         data: user
       });
     } catch (error) {
+      console.log("View Profile Error >>>", error);
       response.status(500).json({
         success: false,
         message: "Internal Server Error",
@@ -202,12 +204,14 @@ class UserController {
       await user.save();
 
       response.status(201).json({
-        message: "Updated profile successfully",
-        data: user
+        success: true,
+        message: "Updated profile successfully"
       });
     } catch (error) {
-      response.status(401).json({
-        message: "Unauthorized",
+      console.log("Edit Profile Error >>>", error);
+      response.status(500).json({
+        success: false,
+        message: "Internal Server Error",
         error
       });
     }
