@@ -232,6 +232,7 @@ class UserController {
         data: user
       });
     } catch (error) {
+      console.log("Verify Account Error", error);
       response.status(404).json({
         message: "Your account has been verified already.",
         error
