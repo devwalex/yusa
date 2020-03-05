@@ -111,7 +111,10 @@ class UserController {
   async viewAllUser({ response }) {
     try {
       // fetching all the registered user
-      const users = await User.all();
+      const users = await User.query()
+        .whereNot("user_role_id", 1)
+        .fetch();
+
       response.status(200).json({
         success: true,
         message: "All registered users",
@@ -161,6 +164,7 @@ class UserController {
       const authenticatedUser = await auth.current.user;
       const user = await User.query()
         .where("id", authenticatedUser.id)
+        .with("userRole")
         .first();
 
       if (!user) {

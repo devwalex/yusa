@@ -23,9 +23,9 @@ Route.get("/", () => {
 Route.post("register", "UserController.register").validator("Register");
 Route.post("login", "UserController.login");
 Route.post("logout", "UserController.logOut").middleware(["auth"]);
-Route.get("users", "UserController.viewAllUser");
+Route.get("users", "UserController.viewAllUser").middleware("yusaAdmin");
 Route.get("account/verify/:verification_token", "UserController.VerifyAccount");
-Route.get("users/:id", "UserController.viewSingleUser");
+Route.get("users/:id", "UserController.viewSingleUser").middleware("yusaAdmin");
 Route.group(() => {
   Route.get("profile", "UserController.viewProfile");
   Route.put("edit-profile", "UserController.editProfile");
