@@ -20,7 +20,7 @@ class AdminSeeder {
     await Database.truncate("users");
     const encryptedPassword = await Hash.make("Yusa123");
 
-    const users = await Database.table("users").insert({
+    await Database.table("users").insert({
       first_name: "Yusa",
       last_name: "Admin",
       email: "dev@yusa.org",
@@ -29,8 +29,14 @@ class AdminSeeder {
       gender: "Male",
       address: "24, Turner Eradiri, Lagos",
       username: "yusa",
-      is_verify: 1
+      user_role_id: 1,
+      is_verify: 1,
+      is_login: 1
     });
+    await Database.table("user_roles").insert([
+      { user_role_label: "Admin" },
+      { user_role_label: "User" }
+    ]);
     await Database.raw("SET FOREIGN_KEY_CHECKS = 1;");
   }
 }
