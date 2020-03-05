@@ -228,12 +228,13 @@ class UserController {
       await user.save();
 
       response.status(200).json({
-        message: "Your account have been verified",
-        data: user
+        success: true,
+        message: "Your account have been verified"
       });
     } catch (error) {
       console.log("Verify Account Error", error);
-      response.status(404).json({
+      response.status(400).json({
+        success: false,
         message: "Your account has been verified already.",
         error
       });
@@ -241,28 +242,37 @@ class UserController {
   }
 
   async logOut({ response, auth }) {
-    const user = await auth.current.user;
+    try {
+      const user = await auth.current.user;
 
-    // get the current user's token
-    const token = auth.getAuthHeader();
+      // get the current user's token
+      const token = auth.getAuthHeader();
 
-    // revoke the token
-    await user
-      .tokens()
-      .where("type", "api_token")
-      .where("is_revoked", false)
-      .where("token", Encryption.decrypt(token))
-      .update({
-        is_revoked: true
+      // revoke the token
+      await user
+        .tokens()
+        .where("type", "api_token")
+        .where("is_revoked", false)
+        .where("token", Encryption.decrypt(token))
+        .update({
+          is_revoked: true
+        });
+
+      user.is_login = false;
+      await user.save();
+
+      return response.send({
+        success: true,
+        message: "Successfully logged out"
       });
-
-    user.is_login = false;
-    await user.save();
-
-    return response.send({
-      message: "Successfully logged out",
-      data: user
-    });
+    } catch (error) {
+      console.log("Logout Error >>>", error);
+      response.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        error
+      });
+    }
   }
 }
 
